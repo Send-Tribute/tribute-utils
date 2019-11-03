@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+  - '10'
+after_success:
+  - ./travis-notification.sh success $DISCORD_WEBHOOK_URL
+after_failure:
+  - ./travis-notification.sh failure $DISCORD_WEBHOOK_URL
