@@ -4,7 +4,8 @@
   "description": "Utility to interact with the rDAI smart-contracts.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"Error: no test specified\"",
+    "lint": "eslint ./src --fix"
   },
   "repository": {
     "type": "git",
@@ -26,5 +27,21 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "ethers": "^4.0.39"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-react": "^7.16.0",
+    "husky": "^3.0.9",
+    "prettier-eslint": "^9.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint"
+    }
   }
 }
