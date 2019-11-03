@@ -1,0 +1,26 @@
+{
+  "name": "tribute-utils",
+  "version": "0.0.1",
+  "description": "Utility to interact with the rDAI smart-contracts.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Send-Tribute/tribute-utils.git"
+  },
+  "keywords": [
+    "rdai",
+    "defi",
+    "ethereum",
+    "interest",
+    "rtoken"
+  ],
+  "author": "Tribute",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Send-Tribute/tribute-utils/issues"
+  },
+  "homepage": "https://github.com/Send-Tribute/tribute-utils#readme"
+}
