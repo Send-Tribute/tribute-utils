@@ -1,6 +1,6 @@
 {
   "name": "tribute-utils",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Utility to interact with the rDAI smart-contracts.",
   "main": "./src/index.js",
   "scripts": {
