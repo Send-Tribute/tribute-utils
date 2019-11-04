@@ -1,8 +1,8 @@
 {
   "name": "tribute-utils",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Utility to interact with the rDAI smart-contracts.",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\"",
     "lint": "eslint ./src --fix"
