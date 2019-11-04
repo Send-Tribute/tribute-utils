@@ -6,8 +6,8 @@ deploy:
   email: $EMAIL_ADDRESS
   api_key: $NPM_AUTH_TOKEN
   on:
-    tags: true
     branch: master
+  tag: next
 after_success:
   - ./travis-notification.sh success $DISCORD_WEBHOOK_URL
 after_failure:
