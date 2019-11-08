@@ -1,3 +1,3 @@
-import Tribute from './Tribute';
+import Tribute from "./Tribute";
 
 export default Tribute;

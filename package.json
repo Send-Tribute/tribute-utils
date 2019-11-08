@@ -22,11 +22,11 @@
   "homepage": "https://github.com/Send-Tribute/tribute-utils#readme",
   "scripts": {
     "lint": "eslint ./src --fix",
-    "update-rdai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_rDai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/rDai.json",
-    "update-cdai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_cDai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/cDai.json",
-    "update-dai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_dai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/dai.json",
-    "update-dai-strat-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_dai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/dai-strat.json",
-    "update-abis": "yarn update-rdai-abi; yarn update-cdai-abi; yarn update-dai-abi; yarn update-dai-strat-abi",
+    "create_abi_dir": "mkdir -p contract_abis",
+    "update-rdai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_rDai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > contract_abis/rDai.json",
+    "update-cdai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_cDai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > contract_abis/cDai.json",
+    "update-dai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_dai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > contract_abis/dai.json",
+    "update-abis": "yarn create_abi_dir && yarn update-rdai-abi && yarn update-cdai-abi && yarn update-dai-abi",
     "ganache_fork": "ganache-cli -f $(node get_infura.js) -m \"$(node get_mnemonic.js)\"",
     "test": "truffle test"
   },
@@ -51,7 +51,8 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.16.0",
     "husky": "^3.0.9",
-    "prettier-eslint": "^9.0.0"
+    "prettier-eslint": "^9.0.0",
+    "node-jq": "^1.10.3"
   },
   "husky": {
     "hooks": {

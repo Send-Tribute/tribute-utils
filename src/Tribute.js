@@ -1,5 +1,7 @@
-require('babel-polyfill')
-const ethers = require('ethers');
+/* eslint-disable */
+require("babel-polyfill");
+const ethers = require("ethers");
+
 const { bigNumberify, formatUnits } = ethers.utils;
 
 class Tribute {
@@ -8,43 +10,43 @@ class Tribute {
     this.DAI_DECIMALS = null;
     this.rDAIContract = rDAIContract;
     this.rDAI_DECIMALS = null;
-    this.SELF_HAT_ID = null
+    this.SELF_HAT_ID = null;
     this.userAddress = userAddress.toLowerCase();
-    this.PROPORTION_BASE = bigNumberify('0xFFFFFFFF');
+    this.PROPORTION_BASE = bigNumberify("0xFFFFFFFF");
   }
 
   async get_DAI_DECIMALS() {
-    if(this.DAI_DECIMALS === null) {
+    if (this.DAI_DECIMALS === null) {
       this.DAI_DECIMALS = await this.DAIContract.decimals();
     }
     return this.DAI_DECIMALS;
   }
 
   async get_rDAI_DECIMALS() {
-    if(this.rDAI_DECIMALS === null) {
+    if (this.rDAI_DECIMALS === null) {
       this.rDAI_DECIMALS = await this.rDAIContract.decimals();
     }
     return this.rDAI_DECIMALS;
   }
 
   async get_SELF_HAT_ID() {
-    if(this.SELF_HAT_ID === null) {
+    if (this.SELF_HAT_ID === null) {
       this.SELF_HAT_ID = await this.rDAIContract.SELF_HAT_ID;
     }
     return this.SELF_HAT_ID;
   }
 
   _calculateProportionWholeNumbers(proportions, balance_BN) {
-    let portionWholeNum = proportions.map(portion => {
-      return bigNumberify(portion)
+    const portionWholeNum = proportions.map(portion =>
+      bigNumberify(portion)
         .mul(balance_BN)
-        .div(this.PROPORTION_BASE);
-    });
+        .div(this.PROPORTION_BASE)
+    );
     return portionWholeNum;
   }
 
   _removeAddressesWithZeroFlow(recipientMap) {
-    for (let [address, portion_BN] of Object.entries(recipientMap)) {
+    for (const [address, portion_BN] of Object.entries(recipientMap)) {
       if (portion_BN.eq(ethers.constants.Zero)) {
         delete recipientMap[address];
       }
@@ -72,7 +74,7 @@ class Tribute {
       amountToTransfer_BN
     );
 
-    const balance_BN = await this.get_rDAIBalance(this.userAddress)
+    const balance_BN = await this.get_rDAIBalance(this.userAddress);
 
     const currentHat = await this.rDAIContract.getHatByAddress(
       this.userAddress
@@ -80,7 +82,10 @@ class Tribute {
 
     const { recipients, proportions } = currentHat;
 
-    let portionWholeNum = this._calculateProportionWholeNumbers(proportions, balance_BN);
+    const portionWholeNum = this._calculateProportionWholeNumbers(
+      proportions,
+      balance_BN
+    );
 
     // convert to object mapping
     let recipientMap = {};
@@ -88,12 +93,14 @@ class Tribute {
       (address, i) => (recipientMap[address.toLowerCase()] = portionWholeNum[i])
     );
 
-    let userBal = recipientMap[this.userAddress]
+    const userBal = recipientMap[this.userAddress]
       ? recipientMap[this.userAddress]
       : balance_BN;
 
-    recipientMap[this.userAddress] = userBal.add(bigNumberify(amountToTransfer));
-    recipientMap = this._removeAddressesWithZeroFlow(recipientMap)
+    recipientMap[this.userAddress] = userBal.add(
+      bigNumberify(amountToTransfer)
+    );
+    recipientMap = this._removeAddressesWithZeroFlow(recipientMap);
 
     await this.rDAIContract.mintWithNewHat(
       amountToTransfer_BN,
@@ -108,37 +115,38 @@ class Tribute {
 
   async getInfo(address) {
     const balance_BN = await this.rDAIContract.balanceOf(address);
-    let unclaimedBalance_BN = await this.rDAIContract.interestPayableOf(
+    const unclaimedBalance_BN = await this.rDAIContract.interestPayableOf(
       address
     );
 
     // Check if the user has a hat
-    const currentHat = await this.rDAIContract.getHatByAddress(
-      address
-    );
+    const currentHat = await this.rDAIContract.getHatByAddress(address);
 
     let { recipients, proportions } = currentHat;
     let unallocatedBalance;
     let portionWholeNum = [];
 
-    //check if hat is empty
+    // check if hat is empty
     if (recipients.length === 0) {
       unallocatedBalance = balance_BN;
     } else {
       // set all recepients to lower case to allow searching
       recipients = currentHat.recipients.map(r => r.toLowerCase());
 
-      portionWholeNum = this._calculateProportionWholeNumbers(proportions, balance_BN);
+      portionWholeNum = this._calculateProportionWholeNumbers(
+        proportions,
+        balance_BN
+      );
 
-      let userIdx = recipients.indexOf(address.toLowerCase());
+      const userIdx = recipients.indexOf(address.toLowerCase());
 
-      //check if user exists
+      // check if user exists
       if (userIdx < 0) {
         unallocatedBalance = ethers.constants.Zero;
       } else {
         unallocatedBalance = portionWholeNum[userIdx];
 
-        //remove user from portionWholeNum
+        // remove user from portionWholeNum
         recipients.splice(userIdx, 1); // remove user from recipients
         portionWholeNum.splice(userIdx, 1); // remove user from the proportions
       }
@@ -162,11 +170,11 @@ class Tribute {
   }
 
   async startFlow(recipientAddress, amount) {
-    let amount_BN = bigNumberify(amount);
+    const amount_BN = bigNumberify(amount);
 
     const rDAI_DECIMALS = await this.get_rDAI_DECIMALS();
 
-    const balance_BN = await this.get_rDAIBalance(this.userAddress)
+    const balance_BN = await this.get_rDAIBalance(this.userAddress);
 
     const currentHat = await this.rDAIContract.getHatByAddress(
       this.userAddress
@@ -174,24 +182,27 @@ class Tribute {
 
     const { recipients, proportions } = currentHat;
 
-    let portionWholeNum = this._calculateProportionWholeNumbers(proportions, balance_BN);
+    const portionWholeNum = this._calculateProportionWholeNumbers(
+      proportions,
+      balance_BN
+    );
 
-    //turn recipients and proportions into map
+    // turn recipients and proportions into map
     // convert to object mapping
     let recipientMap = {};
     recipients.forEach(
       (address, i) => (recipientMap[address.toLowerCase()] = portionWholeNum[i])
     );
 
-    //validate if hat !exist
+    // validate if hat !exist
     const SELF_HAT_ID = await this.get_SELF_HAT_ID();
     if (currentHat.hatID.eq(SELF_HAT_ID) || currentHat.hatID.isZero()) {
-      //if balance < amount
-      if (balance_BN.lt(amount_BN)) throw 'insuffient balance';
+      // if balance < amount
+      if (balance_BN.lt(amount_BN)) throw "insuffient balance";
     }
 
-    //validate if there are amounts left in user portion
-    if (!(this.userAddress in recipientMap)) throw 'insufficient balance left';
+    // validate if there are amounts left in user portion
+    if (!(this.userAddress in recipientMap)) throw "insufficient balance left";
 
     let userBal = recipientMap[this.userAddress]
       ? recipientMap[this.userAddress]
@@ -199,23 +210,23 @@ class Tribute {
     let recipientBal = recipientMap[recipientAddress.toLowerCase()]
       ? recipientMap[recipientAddress.toLowerCase()]
       : ethers.constants.Zero;
-    let sum = userBal.add(recipientBal);
+    const sum = userBal.add(recipientBal);
 
-    if (sum.lt(amount_BN)) throw 'insufficent balance left';
+    if (sum.lt(amount_BN)) throw "insufficent balance left";
 
-    //We have enough to update, continue and update values
+    // We have enough to update, continue and update values
 
-    //update values between user and recipient
+    // update values between user and recipient
     const amountNeeded = amount_BN.sub(recipientBal);
     userBal = userBal.sub(amountNeeded);
     recipientBal = recipientBal.add(amountNeeded);
 
-    //set values
+    // set values
     recipientMap[this.userAddress] = userBal;
     recipientMap[recipientAddress.toLowerCase()] = recipientBal;
     recipientMap = this._removeAddressesWithZeroFlow(recipientMap);
 
-    //update to new hat values
+    // update to new hat values
     await this.rDAIContract.createHat(
       Object.keys(recipientMap),
       Object.values(recipientMap),
@@ -226,7 +237,7 @@ class Tribute {
   async endFlow(addressToRemove) {
     const rDAI_DECIMALS = await this.get_rDAI_DECIMALS();
 
-    const balance_BN = await this.get_rDAIBalance(this.userAddress)
+    const balance_BN = await this.get_rDAIBalance(this.userAddress);
 
     const currentHat = await this.rDAIContract.getHatByAddress(
       this.userAddress
@@ -234,9 +245,12 @@ class Tribute {
 
     const { recipients, proportions } = currentHat;
 
-    let portionWholeNum = this._calculateProportionWholeNumbers(proportions, balance_BN)
+    const portionWholeNum = this._calculateProportionWholeNumbers(
+      proportions,
+      balance_BN
+    );
 
-    //turn recipients and proportions into map
+    // turn recipients and proportions into map
     // convert to object mapping
     let recipientMap = {};
     recipients.forEach(
@@ -246,26 +260,26 @@ class Tribute {
     // validate if hat !exist
     const SELF_HAT_ID = await this.get_SELF_HAT_ID();
     if (currentHat.hatID.eq(SELF_HAT_ID) || currentHat.hatID.isZero())
-      throw 'No flows to end';
+      throw "No flows to end";
 
     // validate if there are amounts left in user portion
     if (!(addressToRemove.toLowerCase() in recipientMap))
       throw `address: ${addressToRemove} does not exist`;
 
-    let userBal = recipientMap[this.userAddress]
+    const userBal = recipientMap[this.userAddress]
       ? recipientMap[this.userAddress]
       : balance_BN;
-    let recipientBal = recipientMap[addressToRemove.toLowerCase()]
+    const recipientBal = recipientMap[addressToRemove.toLowerCase()]
       ? recipientMap[addressToRemove.toLowerCase()]
       : ethers.constants.Zero;
-    let sum = userBal.add(recipientBal);
+    const sum = userBal.add(recipientBal);
 
-    //update and set values between user and recipient
+    // update and set values between user and recipient
     recipientMap[this.userAddress] = userBal.add(recipientBal);
     recipientMap[addressToRemove.toLowerCase()] = ethers.constants.Zero;
     recipientMap = this._removeAddressesWithZeroFlow(recipientMap);
 
-    //update to new hat values
+    // update to new hat values
     await this.rDAIContract.createHat(
       Object.keys(recipientMap),
       Object.values(recipientMap),
@@ -274,9 +288,9 @@ class Tribute {
   }
 
   async claimAmount(address) {
-    //this cashes out all rDAI in both interest
-    //and principal and sends it back to the user
-    //NOTE: this amount is not added to the receiving user's hat, it shows up in their rDAIBalance
+    // this cashes out all rDAI in both interest
+    // and principal and sends it back to the user
+    // NOTE: this amount is not added to the receiving user's hat, it shows up in their rDAIBalance
     await this.rDAIContract.payInterest(address);
   }
 }
