@@ -2,7 +2,7 @@ language: node_js
 node_js:
   - '10'
 script:
-  - test_travis
+  - yarn test_travis
 deploy:
   provider: npm
   email: $EMAIL_ADDRESS
