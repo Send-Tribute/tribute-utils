@@ -2,7 +2,7 @@ language: node_js
 node_js:
   - '10'
 script:
-  - yarn test_travis
+  - yarn ganache_fork_travis > /dev/null & sleep 10 && yarn test
 deploy:
   provider: npm
   email: $EMAIL_ADDRESS

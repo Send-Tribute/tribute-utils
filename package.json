@@ -29,8 +29,7 @@
     "update_abis": "yarn create_abi_dir && yarn update_rdai_abi && yarn update_cdai_abi && yarn update_dai_abi",
     "ganache_fork": "ganache-cli -f $(node get_infura.js) -m \"$(node get_mnemonic.js)\"",
     "test": "truffle test",
-    "ganache_fork_travis": "ganache-cli -f $INFURA_API_KEY -m \"$MNEMONIC\"",
-    "test_travis": "yarn ganache_fork_travis > /dev/null & sleep 10 && yarn test"
+    "ganache_fork_travis": "ganache-cli -f $INFURA_API_KEY -m \"$MNEMONIC\""
   },
   "contracts": {
     "kovan": {
