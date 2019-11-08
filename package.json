@@ -30,7 +30,7 @@
     "ganache_fork": "ganache-cli -f $(node get_infura.js) -m \"$(node get_mnemonic.js)\"",
     "test": "truffle test",
     "ganache_fork_travis": "ganache-cli -f $INFURA_API_KEY -m \"$MNEMONIC\"",
-    "test_travis": "yarn ganache_fork_travis > /dev/null && sleep 10 && yarn test"
+    "test_travis": "yarn ganache_fork_travis > /dev/null & sleep 10 && yarn test"
   },
   "contracts": {
     "kovan": {
