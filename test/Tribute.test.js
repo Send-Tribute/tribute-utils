@@ -8,7 +8,7 @@ const DAI_Kovan = "0xbF7A7169562078c96f0eC1A8aFD6aE50f12e5A99"
 const amountToTransfer = "500.012345678987654321"
 const amountToFlow = "50.012345678987654321"
 
-contract('TESTING', async (accounts) => {
+contract('Test Tribute.js', async (accounts) => {
 
   const owner = accounts[0]
   const randomAccount = accounts[4]
