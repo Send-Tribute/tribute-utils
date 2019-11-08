@@ -40,7 +40,8 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "bignumber.js": "github:frozeman/bignumber.js-nolookahead",
-    "ethers": "^4.0.39"
+    "ethers": "^4.0.39",
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "eslint": "^6.6.0",
