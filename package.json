@@ -3,10 +3,6 @@
   "version": "0.0.4",
   "description": "Utility to interact with the rDAI smart-contracts.",
   "main": "./src/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\"",
-    "lint": "eslint ./src --fix"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Send-Tribute/tribute-utils.git"
@@ -24,8 +20,26 @@
     "url": "https://github.com/Send-Tribute/tribute-utils/issues"
   },
   "homepage": "https://github.com/Send-Tribute/tribute-utils#readme",
+  "scripts": {
+    "lint": "eslint ./src --fix",
+    "update-rdai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_rDai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/rDai.json",
+    "update-cdai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_cDai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/cDai.json",
+    "update-dai-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_dai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/dai.json",
+    "update-dai-strat-abi": "curl -s -X GET \"https://api-kovan.etherscan.io/api?module=contract&action=getabi&address=$npm_package_contracts_kovan_dai\" | ./node_modules/node-jq/bin/jq -r \"[.result][0]\" > src/contracts/dai-strat.json",
+    "update-abis": "yarn update-rdai-abi; yarn update-cdai-abi; yarn update-dai-abi; yarn update-dai-strat-abi",
+    "ganache_fork": "ganache-cli -f $(node get_infura.js) -m \"$(node get_mnemonic.js)\"",
+    "test": "truffle test"
+  },
+  "contracts": {
+    "kovan": {
+      "dai": "0xC4375B7De8af5a38a93548eb8453a498222C4fF2",
+      "cDai": "0x0a1e4d0b5c71b955c0a5993023fc48ba6e380496",
+      "rDai": "0xea718e4602125407fafcb721b7d760ad9652dfe7"
+    }
+  },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "bignumber.js": "github:frozeman/bignumber.js-nolookahead",
     "ethers": "^4.0.39"
   },
   "devDependencies": {
