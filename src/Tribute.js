@@ -127,12 +127,34 @@ class Tribute {
     );
   }
 
+  async generateNew(amountToTransferString, recipients, proportions) {
+    const DAI_DECIMALS = await this.get_DAI_DECIMALS();
+
+    // approve DAI
+    const amountToTransfer_BN = parseUnits(
+      amountToTransferString,
+      DAI_DECIMALS
+    );
+
+    const tx1 = await this.DAIContract.approve(
+      this.rDAIContract.address,
+      amountToTransfer_BN
+    );
+
+    const tx2 = await this.rDAIContract.mintWithNewHat(
+      amountToTransfer_BN,
+      recipients,
+      proportions
+    );
+    return { tx1, tx2 };
+  }
+
   async startFlow(recipientAddress, amountToFlowString) {
     const DAI_DECIMALS = await this.get_DAI_DECIMALS();
 
     // decimals length cannot be bigger than allowed DAI_DECIMALS
-    const decimalSize = amountToFlowString.split(".")[1].length;
-    if (decimalSize > DAI_DECIMALS) throw "Underflow Error";
+    const decimalSize = amountToFlowString.split('.')[1].length;
+    if (decimalSize > DAI_DECIMALS) throw 'Underflow Error';
 
     const amountToFlow_BN = parseUnits(amountToFlowString, DAI_DECIMALS);
 
@@ -284,16 +306,17 @@ class Tribute {
 
   async getInfo(address) {
     const balance_BN = await this.rDAIContract.balanceOf(address);
+    const balance_DAI_BN = await this.DAIContract.balanceOf(address);
     const unclaimedBalance_BN = await this.rDAIContract.interestPayableOf(
       address
     );
 
     // Check if the user has a hat
     const currentHat = await this.rDAIContract.getHatByAddress(address);
-
     let { recipients, proportions } = currentHat;
+
     let unallocatedBalance;
-    let portionWholeNum;
+    let portionWholeNum = [];
 
     // check if hat is empty
     if (recipients.length === 0) {
@@ -322,6 +345,7 @@ class Tribute {
     }
 
     const rDAI_DECIMALS = await this.get_rDAI_DECIMALS();
+    const DAI_DECIMALS = await this.get_DAI_DECIMALS();
 
     return {
       allocations: {
@@ -333,6 +357,7 @@ class Tribute {
         )
       },
       balance: formatUnits(balance_BN, rDAI_DECIMALS),
+      daiBalance: formatUnits(balance_DAI_BN, DAI_DECIMALS),
       unallocated_balance: formatUnits(unallocatedBalance, rDAI_DECIMALS),
       unclaimed_balance: formatUnits(unclaimedBalance_BN, rDAI_DECIMALS)
     };
