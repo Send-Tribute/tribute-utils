@@ -159,8 +159,8 @@ class Tribute {
     const DAI_DECIMALS = await this.get_DAI_DECIMALS();
     let decimalSize = 0;
     // decimals length cannot be bigger than allowed DAI_DECIMALS
-    if (typeof amountToTransferString.split('.')[1] !== 'undefined') {
-      decimalSize = amountToTransferString.split('.')[1].length;
+    if (typeof amountToFlowString.split('.')[1] !== 'undefined') {
+      decimalSize = amountToFlowString.split('.')[1].length;
       if (decimalSize > DAI_DECIMALS) throw 'Underflow Error';
     }
 
