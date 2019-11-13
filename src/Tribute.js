@@ -36,6 +36,16 @@ class Tribute {
     return this.SELF_HAT_ID;
   }
 
+  _calculateDecimalSize(number, DAI_DECIMALS) {
+    let decimalSize = 0;
+    // decimals length cannot be bigger than allowed DAI_DECIMALS
+    if (typeof number.split('.')[1] !== 'undefined') {
+      decimalSize = number.split('.')[1].length;
+      if (decimalSize > DAI_DECIMALS) throw 'Underflow Error';
+    }
+    return decimalSize;
+  }
+
   _calculateProportionWholeNumbers(proportions, balance_BN) {
     // NOTE: All math is done in expanded notion in base 10.
     // This is because there are no decimals
@@ -71,7 +81,12 @@ class Tribute {
   }
 
   async generate(amountToTransferString) {
-    const decimalSize = await this.get_decimal_size(amountToTransferString);
+    const DAI_DECIMALS = await this.get_DAI_DECIMALS();
+
+    const decimalSize = await this._calculateDecimalSize(
+      amountToTransferString,
+      DAI_DECIMALS
+    );
 
     // approve DAI
     const amountToTransfer_BN = parseUnits(
@@ -149,19 +164,13 @@ class Tribute {
     return { tx1, tx2 };
   }
 
-  async getDecimalSize(number) {
-    let decimalSize = 0;
-    const DAI_DECIMALS = await this.get_DAI_DECIMALS();
-    // decimals length cannot be bigger than allowed DAI_DECIMALS
-    if (typeof number.split('.')[1] !== 'undefined') {
-      decimalSize = number.split('.')[1].length;
-      if (decimalSize > DAI_DECIMALS) throw 'Underflow Error';
-    }
-    return decimalSize;
-  }
-
   async startFlow(recipientAddress, amountToFlowString) {
-    const decimalSize = await this.get_decimal_size(amountToFlowString);
+    const DAI_DECIMALS = await this.get_DAI_DECIMALS();
+
+    const decimalSize = this._calculateDecimalSize(
+      amountToFlowString,
+      DAI_DECIMALS
+    );
 
     const amountToFlow_BN = parseUnits(amountToFlowString, DAI_DECIMALS);
 
