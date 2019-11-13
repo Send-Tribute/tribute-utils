@@ -83,7 +83,7 @@ class Tribute {
       DAI_DECIMALS
     );
 
-    await this.DAIContract.approve(
+    const approveTx = await this.DAIContract.approve(
       this.rDAIContract.address,
       amountToTransfer_BN
     );
@@ -119,6 +119,10 @@ class Tribute {
     const newProportions = Object.values(recipientMap).map(value =>
       this._reduceToMaxPrecision(value).toNumber()
     );
+
+    // Ensure the approval is complete before continuing
+    // Else the tx will be rejected due to gas estimation failure
+    await approveTx.wait(1)
 
     await this.rDAIContract.mintWithNewHat(
       amountToTransfer_BN,
