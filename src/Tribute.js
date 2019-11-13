@@ -1,6 +1,6 @@
 /* eslint-disable */
-require("babel-polyfill");
-const ethers = require("ethers");
+require('babel-polyfill');
+const ethers = require('ethers');
 
 const { parseUnits, bigNumberify, formatUnits } = ethers.utils;
 
@@ -12,7 +12,7 @@ class Tribute {
     this.rDAI_DECIMALS = null;
     this.SELF_HAT_ID = null;
     this.userAddress = userAddress.toLowerCase();
-    this.PROPORTION_BASE = bigNumberify("0xFFFFFFFF");
+    this.PROPORTION_BASE = bigNumberify('0xFFFFFFFF');
   }
 
   async get_DAI_DECIMALS() {
@@ -72,10 +72,12 @@ class Tribute {
 
   async generate(amountToTransferString) {
     const DAI_DECIMALS = await this.get_DAI_DECIMALS();
-
+    let decimalSize = 0;
     // decimals length cannot be bigger than allowed DAI_DECIMALS
-    const decimalSize = amountToTransferString.split(".")[1].length;
-    if (decimalSize > DAI_DECIMALS) throw "Underflow Error";
+    if (typeof amountToTransferString.split('.')[1] !== 'undefined') {
+      decimalSize = amountToTransferString.split('.')[1].length;
+      if (decimalSize > DAI_DECIMALS) throw 'Underflow Error';
+    }
 
     // approve DAI
     const amountToTransfer_BN = parseUnits(
@@ -122,7 +124,7 @@ class Tribute {
 
     // Ensure the approval is complete before continuing
     // Else the tx will be rejected due to gas estimation failure
-    await approveTx.wait(1)
+    await approveTx.wait(1);
 
     await this.rDAIContract.mintWithNewHat(
       amountToTransfer_BN,
@@ -185,11 +187,11 @@ class Tribute {
     const SELF_HAT_ID = await this.get_SELF_HAT_ID();
     if (currentHat.hatID.eq(SELF_HAT_ID) || currentHat.hatID.isZero()) {
       // if balance < amountToFlow
-      if (balance_BN.lt(amountToFlow_BN)) throw "insuffient balance";
+      if (balance_BN.lt(amountToFlow_BN)) throw 'insuffient balance';
     }
 
     // validate if there are amountToFlows left in user portion
-    if (!(this.userAddress in recipientMap)) throw "insufficient balance left";
+    if (!(this.userAddress in recipientMap)) throw 'insufficient balance left';
 
     let userBal = recipientMap[this.userAddress]
       ? recipientMap[this.userAddress]
@@ -199,7 +201,7 @@ class Tribute {
       : ethers.constants.Zero;
     const sum = userBal.add(recipientBal);
 
-    if (sum.lt(amountToFlow_BN)) throw "insufficent balance left";
+    if (sum.lt(amountToFlow_BN)) throw 'insufficent balance left';
 
     // If we've reached this point we have enough to update, continue and update values
 
@@ -214,12 +216,12 @@ class Tribute {
     recipientMap = this._removeAddressesWithZeroFlow(recipientMap);
 
     // we need to reduce by additional powers. The difference between the number of 10's digits
-    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split(".")[0]
+    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split('.')[0]
       .length;
     const amountToFlowWholeNumSize = formatUnits(
       recipientBal,
       DAI_DECIMALS
-    ).split(".")[0].length;
+    ).split('.')[0].length;
     const tensDiff = balanceWholeNumSize - amountToFlowWholeNumSize;
 
     const newRecipients = Object.keys(recipientMap);
@@ -262,7 +264,7 @@ class Tribute {
     // validate if hat !exist
     const SELF_HAT_ID = await this.get_SELF_HAT_ID();
     if (currentHat.hatID.eq(SELF_HAT_ID) || currentHat.hatID.isZero())
-      throw "No flows to end";
+      throw 'No flows to end';
 
     // validate if there are amounts left in user portion
     if (!(addressToRemove.toLowerCase() in recipientMap))
@@ -282,12 +284,12 @@ class Tribute {
     recipientMap = this._removeAddressesWithZeroFlow(recipientMap);
 
     // we need to reduce by additional powers. The difference between the number of 10's digits
-    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split(".")[0]
+    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split('.')[0]
       .length;
     const amountToFlowWholeNumSize = formatUnits(
       recipientBal,
       DAI_DECIMALS
-    ).split(".")[0].length;
+    ).split('.')[0].length;
     const tensDiff = balanceWholeNumSize - amountToFlowWholeNumSize;
 
     const newRecipients = Object.keys(recipientMap);
