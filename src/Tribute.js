@@ -1,6 +1,6 @@
 /* eslint-disable */
-require("babel-polyfill");
-const ethers = require("ethers");
+require('babel-polyfill');
+const ethers = require('ethers');
 
 const { parseUnits, bigNumberify, formatUnits } = ethers.utils;
 
@@ -12,7 +12,7 @@ class Tribute {
     this.rDAI_DECIMALS = null;
     this.SELF_HAT_ID = null;
     this.userAddress = userAddress.toLowerCase();
-    this.PROPORTION_BASE = bigNumberify("0xFFFFFFFF");
+    this.PROPORTION_BASE = bigNumberify('0xFFFFFFFF');
   }
 
   async get_DAI_DECIMALS() {
@@ -34,6 +34,16 @@ class Tribute {
       this.SELF_HAT_ID = await this.rDAIContract.SELF_HAT_ID;
     }
     return this.SELF_HAT_ID;
+  }
+
+  _calculateDecimalSize(number, DAI_DECIMALS) {
+    let decimalSize = 0;
+    // decimals length cannot be bigger than allowed DAI_DECIMALS
+    if (typeof number.split('.')[1] !== 'undefined') {
+      decimalSize = number.split('.')[1].length;
+      if (decimalSize > DAI_DECIMALS) throw 'Underflow Error';
+    }
+    return decimalSize;
   }
 
   _calculateProportionWholeNumbers(proportions, balance_BN) {
@@ -73,9 +83,10 @@ class Tribute {
   async generate(amountToTransferString) {
     const DAI_DECIMALS = await this.get_DAI_DECIMALS();
 
-    // decimals length cannot be bigger than allowed DAI_DECIMALS
-    const decimalSize = amountToTransferString.split(".")[1].length;
-    if (decimalSize > DAI_DECIMALS) throw "Underflow Error";
+    const decimalSize = await this._calculateDecimalSize(
+      amountToTransferString,
+      DAI_DECIMALS
+    );
 
     // approve DAI
     const amountToTransfer_BN = parseUnits(
@@ -83,7 +94,7 @@ class Tribute {
       DAI_DECIMALS
     );
 
-    await this.DAIContract.approve(
+    const approveTx = await this.DAIContract.approve(
       this.rDAIContract.address,
       amountToTransfer_BN
     );
@@ -120,6 +131,10 @@ class Tribute {
       this._reduceToMaxPrecision(value).toNumber()
     );
 
+    // Ensure the approval is complete before continuing
+    // Else the tx will be rejected due to gas estimation failure
+    await approveTx.wait(1);
+
     await this.rDAIContract.mintWithNewHat(
       amountToTransfer_BN,
       newRecipients,
@@ -127,12 +142,35 @@ class Tribute {
     );
   }
 
+  async generateNew(amountToTransferString, recipients, proportions) {
+    const DAI_DECIMALS = await this.get_DAI_DECIMALS();
+
+    // approve DAI
+    const amountToTransfer_BN = parseUnits(
+      amountToTransferString,
+      DAI_DECIMALS
+    );
+
+    const tx1 = await this.DAIContract.approve(
+      this.rDAIContract.address,
+      amountToTransfer_BN
+    );
+
+    const tx2 = await this.rDAIContract.mintWithNewHat(
+      amountToTransfer_BN,
+      recipients,
+      proportions
+    );
+    return { tx1, tx2 };
+  }
+
   async startFlow(recipientAddress, amountToFlowString) {
     const DAI_DECIMALS = await this.get_DAI_DECIMALS();
 
-    // decimals length cannot be bigger than allowed DAI_DECIMALS
-    const decimalSize = amountToFlowString.split(".")[1].length;
-    if (decimalSize > DAI_DECIMALS) throw "Underflow Error";
+    const decimalSize = this._calculateDecimalSize(
+      amountToFlowString,
+      DAI_DECIMALS
+    );
 
     const amountToFlow_BN = parseUnits(amountToFlowString, DAI_DECIMALS);
 
@@ -159,11 +197,11 @@ class Tribute {
     const SELF_HAT_ID = await this.get_SELF_HAT_ID();
     if (currentHat.hatID.eq(SELF_HAT_ID) || currentHat.hatID.isZero()) {
       // if balance < amountToFlow
-      if (balance_BN.lt(amountToFlow_BN)) throw "insuffient balance";
+      if (balance_BN.lt(amountToFlow_BN)) throw 'insuffient balance';
     }
 
     // validate if there are amountToFlows left in user portion
-    if (!(this.userAddress in recipientMap)) throw "insufficient balance left";
+    if (!(this.userAddress in recipientMap)) throw 'insufficient balance left';
 
     let userBal = recipientMap[this.userAddress]
       ? recipientMap[this.userAddress]
@@ -173,7 +211,7 @@ class Tribute {
       : ethers.constants.Zero;
     const sum = userBal.add(recipientBal);
 
-    if (sum.lt(amountToFlow_BN)) throw "insufficent balance left";
+    if (sum.lt(amountToFlow_BN)) throw 'insufficent balance left';
 
     // If we've reached this point we have enough to update, continue and update values
 
@@ -188,12 +226,12 @@ class Tribute {
     recipientMap = this._removeAddressesWithZeroFlow(recipientMap);
 
     // we need to reduce by additional powers. The difference between the number of 10's digits
-    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split(".")[0]
+    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split('.')[0]
       .length;
     const amountToFlowWholeNumSize = formatUnits(
       recipientBal,
       DAI_DECIMALS
-    ).split(".")[0].length;
+    ).split('.')[0].length;
     const tensDiff = balanceWholeNumSize - amountToFlowWholeNumSize;
 
     const newRecipients = Object.keys(recipientMap);
@@ -236,7 +274,7 @@ class Tribute {
     // validate if hat !exist
     const SELF_HAT_ID = await this.get_SELF_HAT_ID();
     if (currentHat.hatID.eq(SELF_HAT_ID) || currentHat.hatID.isZero())
-      throw "No flows to end";
+      throw 'No flows to end';
 
     // validate if there are amounts left in user portion
     if (!(addressToRemove.toLowerCase() in recipientMap))
@@ -256,12 +294,12 @@ class Tribute {
     recipientMap = this._removeAddressesWithZeroFlow(recipientMap);
 
     // we need to reduce by additional powers. The difference between the number of 10's digits
-    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split(".")[0]
+    const balanceWholeNumSize = formatUnits(userBal, DAI_DECIMALS).split('.')[0]
       .length;
     const amountToFlowWholeNumSize = formatUnits(
       recipientBal,
       DAI_DECIMALS
-    ).split(".")[0].length;
+    ).split('.')[0].length;
     const tensDiff = balanceWholeNumSize - amountToFlowWholeNumSize;
 
     const newRecipients = Object.keys(recipientMap);
@@ -284,16 +322,17 @@ class Tribute {
 
   async getInfo(address) {
     const balance_BN = await this.rDAIContract.balanceOf(address);
+    const balance_DAI_BN = await this.DAIContract.balanceOf(address);
     const unclaimedBalance_BN = await this.rDAIContract.interestPayableOf(
       address
     );
 
     // Check if the user has a hat
     const currentHat = await this.rDAIContract.getHatByAddress(address);
-
     let { recipients, proportions } = currentHat;
+
     let unallocatedBalance;
-    let portionWholeNum;
+    let portionWholeNum = [];
 
     // check if hat is empty
     if (recipients.length === 0) {
@@ -322,6 +361,7 @@ class Tribute {
     }
 
     const rDAI_DECIMALS = await this.get_rDAI_DECIMALS();
+    const DAI_DECIMALS = await this.get_DAI_DECIMALS();
 
     return {
       allocations: {
@@ -333,6 +373,7 @@ class Tribute {
         )
       },
       balance: formatUnits(balance_BN, rDAI_DECIMALS),
+      daiBalance: formatUnits(balance_DAI_BN, DAI_DECIMALS),
       unallocated_balance: formatUnits(unallocatedBalance, rDAI_DECIMALS),
       unclaimed_balance: formatUnits(unclaimedBalance_BN, rDAI_DECIMALS)
     };
